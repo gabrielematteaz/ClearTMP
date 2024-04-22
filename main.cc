@@ -1,5 +1,6 @@
 #include < Windows.h >
 #include < string >
+#include < fstream >
 #include < iostream >
 
 struct ClearDirResult
@@ -62,7 +63,7 @@ ClearDirResult ClearDir(LPCWSTR dirPath)
 	return result;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	try
 	{
@@ -73,8 +74,11 @@ int main()
 
 		auto result = ClearDir(tempFilesDirPath.c_str());
 
-		std::cout << "Cleared " << result.delFiles << " files (" << result.delBytes << " bytes)" << std::endl;
-		std::cin.get();
+		if (argc > 1)
+		{
+			std::ofstream logFile(argv[1]);
+			logFile << "Cleared " << result.delFiles << " files (" << result.delBytes << " bytes)" << std::endl;
+		}
 	}
 	catch (const std::bad_alloc&)
 	{
