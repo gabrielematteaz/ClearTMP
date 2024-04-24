@@ -29,7 +29,7 @@ ClearDirResult ClearDir(LPCWSTR dirPath)
 	/* Needed to delete files using "relative" path */
 	SetCurrentDirectoryW(dirPath);
 
-	/* Modify 'dirPath' so that 'FindFirstFileW' do not fail */
+	/* Modify 'dirPath' so that 'FindFirstFileW' does not fail */
 	std::wstring modifiedDirPath(dirPath);
 	modifiedDirPath.append(L"\\*");
 
