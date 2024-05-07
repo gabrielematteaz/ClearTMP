@@ -55,7 +55,7 @@ void wstr_free(struct wstr_t* const wstr)
 void clear_dir(struct wstr_t* const path, size_t len)
 {
 	assert(path != NULL);
-	if (!wstr_overwrite(path, len, L"\\*")) return;
+	if (!wstr_overwrite(path, len, L"\\*")) return; /* Needed to list all files in a directory */
 	WIN32_FIND_DATAW* find_data = malloc(sizeof(WIN32_FIND_DATAW));
 	if (find_data == NULL) return;
 	HANDLE find_handle = FindFirstFileW(path->buffer, find_data);
@@ -66,16 +66,17 @@ void clear_dir(struct wstr_t* const path, size_t len)
 		{
 			if (find_data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
+				/* Skip current and parent directory */
 				if (find_data->cFileName[0] == L'.' && (find_data->cFileName[1] == L'\0' || (find_data->cFileName[1] == L'.' && find_data->cFileName[2] == L'\0'))) continue;
-				if (!wstr_overwrite(path, len, find_data->cFileName)) break;
+				if (!wstr_overwrite(path, len, find_data->cFileName)) break; /* Append directory name */
 				size_t new_len = len + wcslen(find_data->cFileName);
 				clear_dir(path, new_len);
-				path->buffer[new_len] = L'\0';
+				path->buffer[new_len] = L'\0'; /* Truncate path */
 				RemoveDirectoryW(path->buffer);
 			}
 			else
 			{
-				if (!wstr_overwrite(path, len, find_data->cFileName)) break;
+				if (!wstr_overwrite(path, len, find_data->cFileName)) break; /* Append file name */
 				DeleteFileW(path->buffer);
 			}
 		} while (FindNextFileW(find_handle, find_data) != 0);
