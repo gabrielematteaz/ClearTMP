@@ -1,14 +1,14 @@
-#include "filesystem.h"
+#include "Filesystem.h"
 
-namespace clear_TMP
+namespace ClearTMP
 {
-	using wstring = std::basic_string < wchar_t, std::char_traits < wchar_t >, matteaz::allocator < wchar_t > >;
+	using wstring = std::basic_string < wchar_t, std::char_traits < wchar_t >, Matteaz::Allocator < wchar_t > >;
 
-	void clear_files(wstring &directory)
+	void ClearFiles(wstring &directory)
 	{
 		auto length = directory.length();
 
-		for (matteaz::directory_iterator iterator(directory.c_str(), directory.get_allocator()); iterator; ++iterator) {
+		for (Matteaz::DirectoryIterator iterator(directory.c_str(), directory.get_allocator()); iterator; ++iterator) {
 			auto entry = *iterator;
 
 			if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
@@ -16,7 +16,7 @@ namespace clear_TMP
 
 				directory.replace(length, directory.length(), L"\\");
 				directory.append(entry.cFileName);
-				clear_files(directory);
+				ClearFiles(directory);
 			}
 			else {
 				directory.replace(length, directory.length(), L"\\");
@@ -35,18 +35,18 @@ int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 	HRESULT code = S_OK;
 
 	try {
-		clear_TMP::wstring directory(MAX_PATH + 1, L'\0');
+		ClearTMP::wstring directory(MAX_PATH + 1, L'\0');
 		SIZE_T result = GetTempPath2W(static_cast < DWORD > (directory.capacity()), directory.data());
 
-		if (result == 0) throw matteaz::DWORD_error(L"GetTempPath2W failed");
+		if (result == 0) throw Matteaz::SystemError(L"GetTempPath2W failed");
 
 		directory.resize(result - 1);
-		clear_TMP::clear_files(directory);
+		ClearTMP::ClearFiles(directory);
 	}
-	catch (const matteaz::DWORD_error &error) {
+	catch (const Matteaz::SystemError &error) {
 		code = HRESULT_FROM_WIN32(error.code);
 	}
-	catch (const matteaz::basic_exception &) {
+	catch (const Matteaz::Exception &) {
 		code = E_FAIL;
 	}
 
